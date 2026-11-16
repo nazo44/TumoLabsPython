@@ -1,0 +1,197 @@
+/* 3D simulator: stage, view chips and the treatment timeline. */
+
+.sim {
+  --sim-ink: #12313a;
+  --sim-accent: #0f8f83;
+  --sim-line: #d9e2e1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sim-stage {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  min-height: 240px;
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 38%, #ffffff 0%, #eef4f3 55%, #dfe9e8 100%);
+  touch-action: none;
+}
+
+.sim-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+.sim-canvas:active { cursor: grabbing; }
+
+.sim-tag {
+  position: absolute;
+  top: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(18, 49, 58, 0.82);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+.sim-tag-left { left: 12px; }
+.sim-tag-right { left: calc(50% + 12px); background: var(--sim-accent); }
+.sim-tag[hidden] { display: none; }
+
+.sim-stage::after {
+  /* divider for the side-by-side view; shown via .sim.is-compare */
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: rgba(18, 49, 58, 0.18);
+  opacity: 0;
+  pointer-events: none;
+}
+.sim-stage:has(.sim-tag-left:not([hidden]))::after { opacity: 1; }
+
+.sim-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #4b6168;
+  font-size: 12px;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+.sim-hint.is-hidden { opacity: 0; }
+
+.sim-unsupported {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: #4b6168;
+}
+
+.sim-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sim-chip {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--sim-line);
+  background: #fff;
+  color: var(--sim-ink);
+  cursor: pointer;
+}
+.sim-chip:hover { border-color: #b7c7c5; }
+.sim-chip.is-on { background: var(--sim-ink); border-color: var(--sim-ink); color: #fff; }
+.sim-chip-toggle { margin-left: auto; }
+.sim-chip-toggle.is-on { background: var(--sim-accent); border-color: var(--sim-accent); }
+
+.sim-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sim-play {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sim-accent);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sim-play:hover { filter: brightness(1.06); }
+
+.sim-range {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.sim-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--sim-accent) var(--fill, 0%), var(--sim-line) var(--fill, 0%));
+}
+.sim-range::-moz-range-track { height: 6px; border-radius: 3px; background: var(--sim-line); }
+.sim-range::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--sim-accent); }
+.sim-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -8px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: var(--sim-accent);
+  box-shadow: 0 1px 4px rgba(18, 49, 58, 0.35);
+}
+.sim-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: var(--sim-accent);
+  box-shadow: 0 1px 4px rgba(18, 49, 58, 0.35);
+}
+
+.sim-readout {
+  flex: none;
+  min-width: 9.5em;
+  text-align: right;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: #4b6168;
+}
+
+.sim-ends {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.sim-end {
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--sim-line);
+  background: #fff;
+  color: var(--sim-ink);
+  cursor: pointer;
+}
+.sim-end.is-on { border-color: var(--sim-accent); background: #e6f4f2; color: #0b6f66; }
+
+@media (max-width: 520px) {
+  .sim-stage { aspect-ratio: 4 / 3.4; }
+  .sim-readout { min-width: 0; font-size: 12px; }
+  .sim-chip { padding: 6px 10px; }
+}
