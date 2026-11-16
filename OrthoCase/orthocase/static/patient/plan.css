@@ -86,8 +86,7 @@ button { cursor: pointer; }
 .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-ink); }
 .hero h1 { margin-top: 8px; }
 .hero .summary { margin-top: 14px; font-size: 17px; color: #2c4a52; white-space: pre-line; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 16px; font-size: 14px; color: var(--muted); }
-.meta span + span::before { content: "·"; margin-right: 14px; }
+.meta { display: grid; gap: 2px; margin-top: 16px; font-size: 14px; color: var(--muted); }
 
 .notice {
   margin-top: 18px;
@@ -215,7 +214,8 @@ footer p + p { margin-top: 4px; }
   backdrop-filter: blur(10px);
   border-top: 1px solid #e4dfd6;
 }
-.actionbar-inner { max-width: 720px; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; }
+.actionbar-inner { max-width: 720px; margin: 0 auto; display: grid; grid-template-columns: 1.25fr 1fr; gap: 8px; }
+.actionbar .btn { padding: 0 10px; font-size: 15px; white-space: nowrap; }
 
 /* ---------- sheets ---------- */
 

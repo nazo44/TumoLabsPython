@@ -11,6 +11,7 @@ import hashlib
 import hmac
 import logging
 import re
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -61,6 +62,7 @@ class Messenger:
         self.config = config
         self.http = http or httpx.AsyncClient(timeout=20)
         self.bot_username: str | None = None
+        self._username_checked_at = -1e9
 
     async def aclose(self) -> None:
         await self.http.aclose()
@@ -85,11 +87,12 @@ class Messenger:
     async def telegram_username(self) -> str | None:
         if not self.config.telegram_live:
             return None
-        if self.bot_username is None:
+        if self.bot_username is None and time.monotonic() - self._username_checked_at > 300:
+            self._username_checked_at = time.monotonic()
             try:
-                me = await self.telegram_call("getMe", {})
+                me = await self.telegram_call("getMe", {}, timeout=6)
                 self.bot_username = me.get("username")
-            except Exception as exc:  # network or bad token: surfaced in /api/status
+            except Exception as exc:  # bad token or no network; retried in a few minutes
                 log.warning("Telegram getMe failed: %s", exc)
         return self.bot_username
 

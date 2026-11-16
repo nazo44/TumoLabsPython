@@ -12,8 +12,6 @@ import io
 import logging
 from datetime import date
 from pathlib import Path
-from typing import Literal
-
 import anthropic
 from pydantic import BaseModel, Field
 
@@ -227,5 +225,3 @@ async def draft_plan(
 
     return draft_to_plan(response.parsed_output, case, settings, today)
 
-
-Source = Literal["ai", "template"]

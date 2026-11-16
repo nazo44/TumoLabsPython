@@ -561,7 +561,6 @@ export class OrthoSimulator {
     this.duration = 7000; // ms for a full play-through
     this.playing = false;
     this.compare = false;
-    this.jawOpen = 0;
     this.show = 'both';
     this.selected = null;
     this.progressListeners = [];
@@ -629,10 +628,7 @@ export class OrthoSimulator {
   _buildModel() {
     this.curves = { U: new ArchCurve(), L: new ArchCurve() };
     this.groups = { U: new THREE.Group(), L: new THREE.Group() };
-    this.jaw = new THREE.Group(); // hinge far behind the molars, so the lower arch swings open
-    this.jaw.position.set(0, 12, -48);
-    this.jaw.add(this.groups.L);
-    this.scene.add(this.groups.U, this.jaw);
+    this.scene.add(this.groups.U, this.groups.L);
 
     const bracketGeometry = buildBracketGeometry();
     const tilt = new THREE.Quaternion(), euler = new THREE.Euler();
@@ -781,8 +777,7 @@ export class OrthoSimulator {
     const jetExcess = e.overjet - NORMAL_OVERJET;
     const drift = 0.5 * ((depthU - this.idealDepth.U) - (depthL - this.idealDepth.L));
     const lowerZ = this.lowerZ0 - 0.6 * jetExcess + drift;
-    this.jaw.rotation.x = this.jawOpen * 0.3;
-    this.groups.L.position.set(-this.jaw.position.x, -this.jaw.position.y, -this.jaw.position.z + lowerZ);
+    this.groups.L.position.z = lowerZ;
 
     const appliance = withAppliance ? this.appliance : 'none';
     const braces = appliance === 'metal' || appliance === 'ceramic';
@@ -863,9 +858,10 @@ export class OrthoSimulator {
     const dt = Math.min(400, elapsed);
     this._last = now;
     if (this.playing) {
-      // Sustained slow frames: render at the screen's base resolution from now on.
+      // Sustained slow frames: step the render resolution down (2x -> 1.5x -> 1x).
       this._slow = elapsed > 55 ? (this._slow || 0) + 1 : 0;
-      if (this._slow > 8 && this.renderer.getPixelRatio() > 1) { this.renderer.setPixelRatio(1); this._resize(); }
+      const ratio = this.renderer.getPixelRatio();
+      if (this._slow > 10 && ratio > 1) { this.renderer.setPixelRatio(ratio > 1.5 ? 1.5 : 1); this._slow = 0; this._resize(); }
       const next = this.progress + dt / this.duration;
       if (next >= 1) { this._setProgress(1); this.playing = false; this._emit(); } else this._setProgress(next);
     }
@@ -969,11 +965,7 @@ export class OrthoSimulator {
     this.setView(this.view || 'front', false);
   }
 
-  setJawOpen(amount) { this.jawOpen = clamp(amount, 0, 1); this._dirty = true; }
-
   selectTooth(fdi) { this.selected = fdi || null; this._dirty = true; }
-
-  renderNow() { this.controls.update(); this._dirty = false; this._render(); }
 
   dispose() {
     this._disposed = true;
@@ -999,7 +991,8 @@ const el = (tag, className, text) => {
 export const SIM_LABELS_EN = {
   before: 'Before', after: 'After', play: 'Play', pause: 'Pause', compare: 'Side by side',
   front: 'Front', right: 'Right', left: 'Left', upper: 'Upper', lower: 'Lower', month: 'Month',
-  start: 'Today', done: 'Result', drag: 'Drag to rotate', unsupported: '3D preview is not available on this device.',
+  start: 'Today', done: 'Result', drag: 'Drag to rotate', model: '3D model of the teeth',
+  unsupported: '3D preview is not available on this device.',
 };
 
 // Builds the viewer plus its transport bar inside `host`. Returns { sim, setMonths }.
@@ -1016,6 +1009,8 @@ export function mountSimulator(host, { labels = SIM_LABELS_EN, editable = false,
     return { sim: null, setMonths() {}, setLabels() {} };
   }
   sim.setView('front', false);
+  sim.renderer.domElement.setAttribute('role', 'img');
+  sim.renderer.domElement.setAttribute('aria-label', labels.model);
 
   const tagBefore = el('span', 'sim-tag sim-tag-left', labels.before);
   const tagAfter = el('span', 'sim-tag sim-tag-right', labels.after);

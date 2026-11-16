@@ -63,7 +63,7 @@ export const STRINGS = {
     sim: {
       before: 'Before', after: 'After', play: 'Play', pause: 'Pause', compare: 'Side by side',
       front: 'Front', right: 'Right', left: 'Left', upper: 'Upper', lower: 'Lower', month: 'Month',
-      start: 'Today', done: 'Result', drag: 'Drag to rotate', unsupported: '3D preview is not available on this device.',
+      start: 'Today', done: 'Result', drag: 'Drag to rotate', model: '3D model of the teeth', unsupported: '3D preview is not available on this device.',
     },
   },
   ru: {
@@ -126,7 +126,7 @@ export const STRINGS = {
     sim: {
       before: 'До', after: 'После', play: 'Запустить', pause: 'Пауза', compare: 'Сравнить',
       front: 'Спереди', right: 'Справа', left: 'Слева', upper: 'Верх', lower: 'Низ', month: 'Месяц',
-      start: 'Сегодня', done: 'Результат', drag: 'Потяните, чтобы повернуть', unsupported: '3D-просмотр недоступен на этом устройстве.',
+      start: 'Сегодня', done: 'Результат', drag: 'Потяните, чтобы повернуть', model: '3D-модель зубов', unsupported: '3D-просмотр недоступен на этом устройстве.',
     },
   },
   hy: {
@@ -189,7 +189,7 @@ export const STRINGS = {
     sim: {
       before: 'Մինչև', after: 'Հետո', play: 'Միացնել', pause: 'Դադար', compare: 'Համեմատել',
       front: 'Առջևից', right: 'Աջից', left: 'Ձախից', upper: 'Վերին', lower: 'Ստորին', month: 'Ամիս',
-      start: 'Այսօր', done: 'Արդյունք', drag: 'Քաշեք՝ պտտելու համար', unsupported: '3D դիտումը հասանելի չէ այս սարքում։',
+      start: 'Այսօր', done: 'Արդյունք', drag: 'Քաշեք՝ պտտելու համար', model: 'Ատամների 3D մոդել', unsupported: '3D դիտումը հասանելի չէ այս սարքում։',
     },
   },
 };

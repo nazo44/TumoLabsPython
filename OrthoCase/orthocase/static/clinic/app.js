@@ -115,7 +115,7 @@ async function viewCases() {
     const count = (key) => data.cases.filter((c) => (key === 'reply' ? c.pending_question : c.status === key)).length;
     put(body, 
       h('div.stats',
-        h('div.card.stat', h('div.label', 'Plans sent'), h('div.value', st.sent), h('div.sub', `${st.total} cases in total`)),
+        h('div.card.stat', h('div.label', 'Plans sent'), h('div.value', st.sent), h('div.sub', `${st.total} case${st.total === 1 ? '' : 's'} in total`)),
         h('div.card.stat', h('div.label', 'Opened by patient'), h('div.value', st.view_rate === null ? '—' : `${st.view_rate}%`), h('div.sub', `${st.viewed} of ${st.sent}`)),
         h('div.card.stat', h('div.label', 'Accepted'), h('div.value', st.accept_rate === null ? '—' : `${st.accept_rate}%`), h('div.sub', `${st.booked} booked · ${st.declined} declined`)),
         h('div.card.stat', h('div.label', 'Booked value'), h('div.value', money(st.booked_value)), h('div.sub', 'from accepted plans')),

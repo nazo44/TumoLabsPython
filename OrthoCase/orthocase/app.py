@@ -38,6 +38,16 @@ CSP = (
 )
 
 
+async def read_json(request: Request) -> dict:
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(400, "Expected a JSON body.")
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Expected a JSON object.")
+    return body
+
+
 def _process_image(data: bytes, dest: Path) -> int:
     """Validate an upload as a real image, drop its metadata (phone photos carry
     GPS coordinates) and store it as a reasonably sized JPEG."""
@@ -171,7 +181,7 @@ def create_app(
         client = request.client.host if request.client else "unknown"
         if not security.login_allowed(client):
             raise HTTPException(429, "Too many attempts. Try again in a few minutes.")
-        body = await request.json()
+        body = await read_json(request)
         if not security.check_password(config.admin_password, str(body.get("password") or "")):
             security.record_failed_login(client)
             raise HTTPException(401, "Wrong password.")
@@ -230,7 +240,7 @@ def create_app(
 
     @app.put("/api/settings", dependencies=[auth])
     async def put_settings(request: Request):
-        return {"settings": service.save_settings(await request.json())}
+        return {"settings": service.save_settings(await read_json(request))}
 
     # ------------------------------------------------------------------
     # Clinic: cases
@@ -303,7 +313,7 @@ def create_app(
 
     @app.post("/api/cases", dependencies=[auth])
     async def create_case(request: Request):
-        case = service.create_case(await request.json())
+        case = service.create_case(await read_json(request))
         return await case_detail(case)
 
     @app.get("/api/cases/{case_id}", dependencies=[auth])
@@ -313,7 +323,7 @@ def create_app(
     @app.patch("/api/cases/{case_id}", dependencies=[auth])
     async def patch_case(case_id: int, request: Request):
         service.require_case(case_id)
-        body = await request.json()
+        body = await read_json(request)
         updates: dict[str, Any] = {}
         if "patient_name" in body:
             name = str(body["patient_name"] or "").strip()[:80]
@@ -387,7 +397,7 @@ def create_app(
     @app.patch("/api/attachments/{attachment_id}", dependencies=[auth])
     async def patch_attachment(attachment_id: int, request: Request):
         require_attachment(attachment_id)
-        body = await request.json()
+        body = await read_json(request)
         updates: dict[str, Any] = {}
         if body.get("kind") in ("xray", "photo"):
             updates["kind"] = body["kind"]
@@ -451,19 +461,19 @@ def create_app(
 
     @app.post("/api/cases/{case_id}/pause", dependencies=[auth])
     async def pause_case(case_id: int, request: Request):
-        body = await request.json()
+        body = await read_json(request)
         service.set_paused(case_id, bool(body.get("paused")))
         return await case_detail(service.require_case(case_id))
 
     @app.post("/api/cases/{case_id}/reply", dependencies=[auth])
     async def reply_case(case_id: int, request: Request):
-        body = await request.json()
+        body = await read_json(request)
         result = await service.reply(case_id, str(body.get("text") or ""))
         return {"result": result, "case": await case_detail(service.require_case(case_id))}
 
     @app.post("/api/cases/{case_id}/status", dependencies=[auth])
     async def status_case(case_id: int, request: Request):
-        body = await request.json()
+        body = await read_json(request)
         service.set_status(case_id, str(body.get("status") or ""))
         return await case_detail(service.require_case(case_id))
 
@@ -553,7 +563,7 @@ def create_app(
         case = live_case(token)
         if not public_events.allow(token):
             return {"ok": True}
-        body = await request.json()
+        body = await read_json(request)
         kind = str(body.get("type") or "")
         if kind == "view":
             service.record_view(case)
@@ -570,14 +580,14 @@ def create_app(
     async def public_book(token: str, request: Request):
         case = live_case(token)
         limit_action(token)
-        await service.book(case, await request.json())
+        await service.book(case, await read_json(request))
         return {"ok": True}
 
     @app.post("/api/public/{token}/question")
     async def public_question(token: str, request: Request):
         case = live_case(token)
         limit_action(token)
-        body = await request.json()
+        body = await read_json(request)
         await service.question(case, str(body.get("text") or ""), "page")
         return {"ok": True}
 
@@ -585,7 +595,7 @@ def create_app(
     async def public_decline(token: str, request: Request):
         case = live_case(token)
         limit_action(token)
-        body = await request.json()
+        body = await read_json(request)
         await service.decline(case, str(body.get("reason") or "other"), str(body.get("note") or ""), via="page")
         return {"ok": True}
 
@@ -599,7 +609,7 @@ def create_app(
         given = request.headers.get("x-telegram-bot-api-secret-token", "")
         if not secret or not hmac.compare_digest(secret.encode(), given.encode()):
             raise HTTPException(403, "Forbidden")
-        await service.handle_telegram_update(await request.json())
+        await service.handle_telegram_update(await read_json(request))
         return {"ok": True}
 
     @app.get("/webhooks/whatsapp")
@@ -619,7 +629,7 @@ def create_app(
         raw = await request.body()
         if not messenger.verify_whatsapp_signature(raw, request.headers.get("x-hub-signature-256")):
             raise HTTPException(403, "Forbidden")
-        await service.handle_whatsapp_payload(await request.json())
+        await service.handle_whatsapp_payload(await read_json(request))
         return {"ok": True}
 
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

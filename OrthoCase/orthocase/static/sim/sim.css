@@ -194,4 +194,5 @@
   .sim-stage { aspect-ratio: 4 / 3.4; }
   .sim-readout { min-width: 0; font-size: 12px; }
   .sim-chip { padding: 6px 10px; }
+  .sim-chip-toggle { margin-left: 0; }
 }

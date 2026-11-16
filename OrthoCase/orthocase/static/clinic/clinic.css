@@ -61,6 +61,7 @@ main { max-width: 1320px; margin: 0 auto; padding: 24px; }
 .card > h2 { margin-bottom: 12px; }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .card-head h2 { margin: 0; }
+.card-head select { width: auto; max-width: 280px; }
 .stack { display: grid; gap: 16px; align-content: start; }
 .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .muted { color: var(--muted); }
